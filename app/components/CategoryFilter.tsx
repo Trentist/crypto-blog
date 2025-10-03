@@ -20,7 +20,6 @@ export default function CategoryFilter({ categories }: CategoryFilterProps) {
   const [mounted, setMounted] = useState(false)
   const searchParams = useSearchParams()
   const selectedCategories = searchParams.get('categories')?.split(',') || []
-  const selectedYear = searchParams.get('year')
   
   const displayCategories = showAll ? categories : categories.slice(0, 6)
 
@@ -28,10 +27,9 @@ export default function CategoryFilter({ categories }: CategoryFilterProps) {
     setMounted(true)
   }, [])
 
-  // Create URL with current year filter preserved and multiple categories
+  // Create URL with multiple categories
   const createCategoryUrl = (categorySlug?: string) => {
     const params = new URLSearchParams()
-    if (selectedYear) params.set('year', selectedYear)
     // Reset to page 1 when changing filters
     params.delete('page')
     
@@ -60,8 +58,7 @@ export default function CategoryFilter({ categories }: CategoryFilterProps) {
   if (!mounted) {
     return (
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold text-slate-700 dark:text-gray-200">Categories</h3>
+        <div className="flex items-center justify-end mb-3">
           {categories.length > 6 && (
             <span className="text-xs text-cyan-600 dark:text-cyan-400 font-medium">
               {categories.length} topics
@@ -87,23 +84,22 @@ export default function CategoryFilter({ categories }: CategoryFilterProps) {
   }
 
   return (
-    <div className="mb-6">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold text-slate-700 dark:text-gray-200">Categories</h3>
+    <div className="mb-4 sm:mb-6">
+      <div className="flex items-center justify-end mb-2 sm:mb-3">
         {categories.length > 6 && (
           <button
             onClick={() => setShowAll(!showAll)}
-            className="text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition font-medium"
+            className="text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition font-medium px-2 py-1 rounded"
           >
             {showAll ? 'Less' : 'More'}
           </button>
         )}
       </div>
       
-      <div className="space-y-2">
+      <div className="space-y-1.5 sm:space-y-2">
         <Link
           href={createCategoryUrl()}
-          className={`block px-3 py-2 rounded-lg border transition font-medium text-center text-sm ${
+          className={`block px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border transition font-medium text-center text-xs sm:text-sm ${
             selectedCategories.length === 0
               ? 'bg-slate-200/70 dark:bg-slate-600/50 border-purple-300/40 dark:border-purple-500/40 text-slate-800 dark:text-gray-100'
               : 'bg-white/50 dark:bg-slate-700/30 border-slate-300/30 dark:border-slate-500/30 text-slate-700 dark:text-gray-300 hover:border-purple-300/40 dark:hover:border-purple-500/40 hover:bg-slate-100/50 dark:hover:bg-slate-600/40'
@@ -115,7 +111,7 @@ export default function CategoryFilter({ categories }: CategoryFilterProps) {
           <Link
             key={category._id}
             href={createCategoryUrl(category.slug.current)}
-            className={`block px-3 py-2 rounded-lg border transition font-medium text-center text-sm ${
+            className={`block px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border transition font-medium text-center text-xs sm:text-sm ${
               selectedCategories.includes(category.slug.current)
                 ? 'bg-purple-100/70 dark:bg-purple-500/25 border-purple-300/40 dark:border-purple-500/40 text-purple-800 dark:text-purple-200'
                 : 'bg-white/50 dark:bg-slate-700/30 border-slate-300/30 dark:border-slate-500/30 text-slate-700 dark:text-gray-300 hover:border-purple-300/40 dark:hover:border-purple-500/40 hover:bg-purple-50/50 dark:hover:bg-purple-500/20'
