@@ -29,7 +29,7 @@ export const paginatedPostsQuery = groq`{
       name,
       image
     },
-    categories[]->{
+    "categories": categories[]->{
       title,
       slug
     }
@@ -49,7 +49,7 @@ export const filteredPostsQuery = groq`{
       name,
       image
     },
-    categories[]->{
+    "categories": categories[]->{
       title,
       slug
     }

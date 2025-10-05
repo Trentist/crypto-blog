@@ -19,7 +19,7 @@ export default function CategoryFilter({ categories }: CategoryFilterProps) {
   const [showAll, setShowAll] = useState(false)
   const [mounted, setMounted] = useState(false)
   const searchParams = useSearchParams()
-  const selectedCategories = searchParams.get('categories')?.split(',') || []
+  const selectedCategory = searchParams.get('category') || ''
   
   const displayCategories = showAll ? categories : categories.slice(0, 6)
 
@@ -27,32 +27,29 @@ export default function CategoryFilter({ categories }: CategoryFilterProps) {
     setMounted(true)
   }, [])
 
-  // Create URL with multiple categories
+  // Create URL with single category selection
   const createCategoryUrl = (categorySlug?: string) => {
     const params = new URLSearchParams()
     // Reset to page 1 when changing filters
     params.delete('page')
     
-    let newCategories = [...selectedCategories]
-    
     if (categorySlug) {
-      // Toggle category selection
-      if (newCategories.includes(categorySlug)) {
-        newCategories = newCategories.filter(cat => cat !== categorySlug)
+      // Toggle category selection (select/deselect)
+      if (selectedCategory === categorySlug) {
+        // Deselect if already selected
+        params.delete('category')
       } else {
-        newCategories.push(categorySlug)
+        // Select new category
+        params.set('category', categorySlug)
       }
     } else {
-      // Clear all categories
-      newCategories = []
-    }
-    
-    if (newCategories.length > 0) {
-      params.set('categories', newCategories.join(','))
+      // Clear category selection
+      params.delete('category')
     }
     
     const queryString = params.toString()
-    return `/blog${queryString ? `?${queryString}` : ''}`
+    const url = `/blog${queryString ? `?${queryString}` : ''}`
+    return url
   }
 
   if (!mounted) {
@@ -100,7 +97,7 @@ export default function CategoryFilter({ categories }: CategoryFilterProps) {
         <Link
           href={createCategoryUrl()}
           className={`block px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border transition font-medium text-center text-xs sm:text-sm ${
-            selectedCategories.length === 0
+            selectedCategory === ''
               ? 'bg-slate-200/70 dark:bg-slate-600/50 border-purple-300/40 dark:border-purple-500/40 text-slate-800 dark:text-gray-100'
               : 'bg-white/50 dark:bg-slate-700/30 border-slate-300/30 dark:border-slate-500/30 text-slate-700 dark:text-gray-300 hover:border-purple-300/40 dark:hover:border-purple-500/40 hover:bg-slate-100/50 dark:hover:bg-slate-600/40'
           }`}
@@ -112,7 +109,7 @@ export default function CategoryFilter({ categories }: CategoryFilterProps) {
             key={category._id}
             href={createCategoryUrl(category.slug.current)}
             className={`block px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg border transition font-medium text-center text-xs sm:text-sm ${
-              selectedCategories.includes(category.slug.current)
+              selectedCategory === category.slug.current
                 ? 'bg-purple-100/70 dark:bg-purple-500/25 border-purple-300/40 dark:border-purple-500/40 text-purple-800 dark:text-purple-200'
                 : 'bg-white/50 dark:bg-slate-700/30 border-slate-300/30 dark:border-slate-500/30 text-slate-700 dark:text-gray-300 hover:border-purple-300/40 dark:hover:border-purple-500/40 hover:bg-purple-50/50 dark:hover:bg-purple-500/20'
             }`}

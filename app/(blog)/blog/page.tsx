@@ -38,7 +38,7 @@ interface PaginatedResult {
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: { categories?: string; page?: string }
+  searchParams: { category?: string; page?: string }
 }) {
   const postsPerPage = 12
   const currentPage = parseInt(searchParams.page || '1', 10)
@@ -47,22 +47,38 @@ export default async function BlogPage({
   const categories: Category[] = await client.fetch(categoriesQuery)
   
   // Build filter conditions for GROQ query
-  let filterConditions = ''
   const queryParams: any = {
     offset,
     limit: postsPerPage
   }
   
-  if (searchParams.categories) {
-    const categorySlugs = searchParams.categories.split(',')
-    const categoryCondition = categorySlugs
-      .map(slug => `"${slug}" in categories[]->slug.current`)
-      .join(' || ')
-    filterConditions = `(${categoryCondition})`
-    queryParams.conditions = filterConditions
+  if (searchParams.category) {
+    const categorySlug = searchParams.category
+    // Use direct query syntax for single category
+    const categoryCondition = `"${categorySlug}" in categories[]->slug.current`
     
-    // Fetch filtered and paginated posts
-    const result: PaginatedResult = await client.fetch(filteredPostsQuery, queryParams)
+    // Use direct query for single category
+    const directQuery = `{
+      "posts": *[_type == "post" && ${categoryCondition}] | order(publishedAt desc)[${offset}...${offset + postsPerPage}] {
+        _id,
+        title,
+        slug,
+        publishedAt,
+        excerpt,
+        mainImage,
+        author->{
+          name,
+          image
+        },
+        "categories": categories[]->{
+          title,
+          slug
+        }
+      },
+      "total": count(*[_type == "post" && ${categoryCondition}])
+    }`
+    
+    const result: PaginatedResult = await client.fetch(directQuery)
     var { posts, total } = result
   } else {
     // Fetch all paginated posts
@@ -99,7 +115,7 @@ export default async function BlogPage({
             <>
               <FilteredBlogPosts 
                 posts={posts} 
-                selectedCategories={searchParams.categories?.split(',')}
+                selectedCategories={searchParams.category ? [searchParams.category] : []}
               />
               <Pagination
                 currentPage={currentPage}
@@ -117,8 +133,8 @@ export default async function BlogPage({
                   No posts found
                 </h2>
                 <p className="text-sm sm:text-base text-gray-500 max-w-md mx-auto">
-                  {searchParams.categories 
-                    ? 'Try adjusting your categories to see more content'
+                  {searchParams.category 
+                    ? 'Try adjusting your category to see more content'
                     : 'Check back later for new content'
                   }
                 </p>
