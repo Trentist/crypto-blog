@@ -1,8 +1,9 @@
 import { client } from '@/sanity/lib/client'
-import { paginatedPostsQuery, filteredPostsQuery, categoriesQuery } from '@/sanity/lib/queries'
+import { allPostsQuery, postsByCategorySlugQuery, categoriesQuery } from '@/sanity/lib/queries'
 import FilteredBlogPosts from '@/app/components/FilteredBlogPosts'
 import ClientFilters from '@/app/components/ClientFilters'
 import Pagination from '@/app/components/Pagination'
+import { selectedPostIds } from '@/data/selected-posts'
 
 export const revalidate = 60
 
@@ -42,52 +43,25 @@ export default async function BlogPage({
 }) {
   const postsPerPage = 12
   const currentPage = parseInt(searchParams.page || '1', 10)
-  const offset = (currentPage - 1) * postsPerPage
   
   const categories: Category[] = await client.fetch(categoriesQuery)
   
-  // Build filter conditions for GROQ query
-  const queryParams: any = {
-    offset,
-    limit: postsPerPage
-  }
-  
+  // Fetch all posts or posts by category
+  let allPosts: Post[]
   if (searchParams.category) {
-    const categorySlug = searchParams.category
-    // Use direct query syntax for single category
-    const categoryCondition = `"${categorySlug}" in categories[]->slug.current`
-    
-    // Use direct query for single category
-    const directQuery = `{
-      "posts": *[_type == "post" && ${categoryCondition}] | order(publishedAt desc)[${offset}...${offset + postsPerPage}] {
-        _id,
-        title,
-        slug,
-        publishedAt,
-        excerpt,
-        mainImage,
-        author->{
-          name,
-          image
-        },
-        "categories": categories[]->{
-          title,
-          slug
-        }
-      },
-      "total": count(*[_type == "post" && ${categoryCondition}])
-    }`
-    
-    const result: PaginatedResult = await client.fetch(directQuery)
-    var { posts, total } = result
+    allPosts = await client.fetch(postsByCategorySlugQuery, { slug: searchParams.category })
   } else {
-    // Fetch all paginated posts
-    const result: PaginatedResult = await client.fetch(paginatedPostsQuery, queryParams)
-    var { posts, total } = result
+    allPosts = await client.fetch(allPostsQuery)
   }
   
-  // Calculate pagination info
+  // Filter to only show selected posts
+  const selectedPosts = allPosts.filter(post => selectedPostIds.includes(post._id))
+  
+  // Calculate pagination
+  const total = selectedPosts.length
   const totalPages = Math.ceil(total / postsPerPage)
+  const offset = (currentPage - 1) * postsPerPage
+  const posts = selectedPosts.slice(offset, offset + postsPerPage)
 
   return (
     <div className="w-full">

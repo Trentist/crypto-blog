@@ -1,6 +1,7 @@
 import { client } from '@/sanity/lib/client'
 import { postsByCategoryQuery, categoriesQuery } from '@/sanity/lib/queries'
 import PostCard from '@/app/components/PostCard'
+import { selectedPostIds } from '@/data/selected-posts'
 
 export const revalidate = 60
 
@@ -36,9 +37,12 @@ export async function generateStaticParams() {
 }
 
 export default async function CategoryPage({ params }: { params: { slug: string } }) {
-  const posts: Post[] = await client.fetch(postsByCategoryQuery, { slug: params.slug })
+  const allPosts: Post[] = await client.fetch(postsByCategoryQuery, { slug: params.slug })
   const categories: Category[] = await client.fetch(categoriesQuery)
   const currentCategory = categories.find((cat) => cat.slug.current === params.slug)
+  
+  // Filter to only show selected posts
+  const posts = allPosts.filter(post => selectedPostIds.includes(post._id))
 
   return (
     <div className="max-w-7xl mx-auto">

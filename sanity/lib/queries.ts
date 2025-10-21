@@ -17,44 +17,40 @@ export const postsQuery = groq`*[_type == "post"] | order(publishedAt desc) {
   }
 }`
 
-export const paginatedPostsQuery = groq`{
-  "posts": *[_type == "post"] | order(publishedAt desc)[$offset...$limit] {
-    _id,
-    title,
-    slug,
-    publishedAt,
-    excerpt,
-    mainImage,
-    author->{
-      name,
-      image
-    },
-    "categories": categories[]->{
-      title,
-      slug
-    }
+// Returns all posts - filtering by selected IDs happens in the page component
+export const allPostsQuery = groq`*[_type == "post"] | order(publishedAt desc) {
+  _id,
+  title,
+  slug,
+  publishedAt,
+  excerpt,
+  mainImage,
+  author->{
+    name,
+    image
   },
-  "total": count(*[_type == "post"])
+  "categories": categories[]->{
+    title,
+    slug
+  }
 }`
 
-export const filteredPostsQuery = groq`{
-  "posts": *[_type == "post" && $conditions] | order(publishedAt desc)[$offset...$limit] {
-    _id,
-    title,
-    slug,
-    publishedAt,
-    excerpt,
-    mainImage,
-    author->{
-      name,
-      image
-    },
-    "categories": categories[]->{
-      title,
-      slug
-    }
+// Fetch posts by category - filtering by selected IDs happens in the page component
+export const postsByCategorySlugQuery = groq`*[_type == "post" && $slug in categories[]->slug.current] | order(publishedAt desc) {
+  _id,
+  title,
+  slug,
+  publishedAt,
+  excerpt,
+  mainImage,
+  author->{
+    name,
+    image
   },
-  "total": count(*[_type == "post" && $conditions])
+  "categories": categories[]->{
+    title,
+    slug
+  }
 }`
 
 export const postQuery = groq`*[_type == "post" && slug.current == $slug][0] {
@@ -69,6 +65,24 @@ export const postQuery = groq`*[_type == "post" && slug.current == $slug][0] {
     name,
     image,
     bio
+  },
+  categories[]->{
+    title,
+    slug
+  }
+}`
+
+// Admin queries - fetch ALL posts
+export const adminPostsQuery = groq`*[_type == "post"] | order(publishedAt desc) {
+  _id,
+  title,
+  slug,
+  publishedAt,
+  excerpt,
+  mainImage,
+  author->{
+    name,
+    image
   },
   categories[]->{
     title,

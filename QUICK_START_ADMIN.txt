@@ -1,0 +1,47 @@
+🚀 QUICK START: Admin Dashboard Setup
+==========================================
+
+✅ What's Been Done:
+- Created admin dashboard at /admin
+- Updated all blog pages to show only selected posts
+- Created API endpoints for managing selections
+- Selections stored locally in data/selected-posts.ts (TypeScript)
+
+📝 What You Need To Do:
+
+1. SET ADMIN PASSWORD:
+   Add to .env.local:
+   ADMIN_PASSWORD=your-secure-password
+
+2. START SERVER:
+   npm run dev
+
+3. LOGIN TO ADMIN:
+   - Visit: http://localhost:3000/admin
+   - Enter your password
+   - Click Login
+
+4. SELECT POSTS TO DISPLAY:
+   - Toggle posts ON (green) to show on blog
+   - Toggle posts OFF (gray) to hide from blog
+   - Changes save automatically
+   - Click Logout when done
+
+5. VIEW YOUR BLOG:
+   - Homepage: http://localhost:3000
+   - Blog page: http://localhost:3000/blog
+   - Only selected posts will appear
+
+6. FOR PRODUCTION:
+   - Set ADMIN_PASSWORD in Vercel/hosting env vars
+   - Commit data/selected-posts.ts to git
+   - Deploy as normal
+
+🎉 That's it! Admin dashboard is password protected!
+
+📖 For detailed instructions, see: ADMIN_SETUP.md
+
+✅ SECURITY:
+    Admin route is now protected with password authentication!
+    Remember to set a strong password in production.
+

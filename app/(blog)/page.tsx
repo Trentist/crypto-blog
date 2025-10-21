@@ -1,8 +1,9 @@
 import { client } from '@/sanity/lib/client'
-import { postsQuery } from '@/sanity/lib/queries'
+import { allPostsQuery } from '@/sanity/lib/queries'
 import PostCard from '../components/PostCard'
 import Link from 'next/link'
 import Image from 'next/image'
+import { selectedPostIds } from '@/data/selected-posts'
 
 export const revalidate = 60
 
@@ -24,7 +25,11 @@ interface Post {
 }
 
 export default async function Home() {
-  const posts: Post[] = await client.fetch(postsQuery)
+  const allPosts: Post[] = await client.fetch(allPostsQuery)
+  
+  // Filter to only show selected posts
+  const posts = allPosts.filter(post => selectedPostIds.includes(post._id))
+  
   const latestPosts = posts.slice(0, 6) // Show only 6 latest posts
 
   return (
